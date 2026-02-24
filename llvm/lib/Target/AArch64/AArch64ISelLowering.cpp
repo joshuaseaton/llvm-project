@@ -2118,6 +2118,8 @@ AArch64TargetLowering::AArch64TargetLowering(const TargetMachine &TM,
     setOperationAction(ISD::INTRINSIC_W_CHAIN, MVT::i8, Custom);
   }
 
+  setOperationAction(ISD::INTRINSIC_VOID, MVT::i8, Custom);
+  setOperationAction(ISD::INTRINSIC_VOID, MVT::i16, Custom);
   setOperationAction(ISD::INTRINSIC_VOID, MVT::Other, Custom);
 
   if (Subtarget->hasSVE()) {
