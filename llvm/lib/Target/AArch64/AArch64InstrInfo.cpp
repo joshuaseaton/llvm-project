@@ -194,6 +194,28 @@ unsigned AArch64InstrInfo::getInstSizeInBytes(const MachineInstr &MI) const {
   case AArch64::SPACE:
     NumBytes = MI.getOperand(1).getImm();
     break;
+
+  case AArch64::MOVaddr:
+  case AArch64::MOVaddrJT:
+  case AArch64::MOVaddrCP:
+  case AArch64::MOVaddrBA:
+  case AArch64::MOVaddrTLS:
+  case AArch64::MOVaddrEXT:
+    // ADRP + ADD, or ADRP + MOVK + ADD if tagged.
+    NumBytes =
+        (MI.getOperand(1).getTargetFlags() & AArch64II::MO_TAGGED) ? 12 : 8;
+    break;
+
+  case AArch64::MOVi32imm:
+  case AArch64::MOVi64imm: {
+    // Use the same logic as the pseudo expansion to count instructions.
+    unsigned BitSize = Desc.getOpcode() == AArch64::MOVi32imm ? 32 : 64;
+    SmallVector<AArch64_IMM::ImmInsnModel, 4> Insn;
+    AArch64_IMM::expandMOVImm(MI.getOperand(1).getImm(), BitSize, Insn);
+    NumBytes = Insn.size() * 4;
+    break;
+  }
+
   case TargetOpcode::BUNDLE:
     NumBytes = getInstBundleLength(MI);
     break;
